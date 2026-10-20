@@ -178,3 +178,17 @@ dotnet publish BoxScanJoiner.Gui -c Release -r linux-x64 -o out/gui
 Use `-r win-x64` for Windows. Published this way, the programs need the .NET 10
 runtime on the computer that runs them. Add `--self-contained` to include the
 runtime, so the folder can be copied to any computer of the same kind.
+
+## License
+
+Copyright © 2026 Natalia Portillo
+
+Box Scan Joiner is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the [GNU General Public License](LICENSE) for more
+details.

@@ -5,5 +5,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <Authors>Natalia Portillo</Authors>
+    <Copyright>Copyright © 2026 Natalia Portillo</Copyright>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
   </PropertyGroup>
 </Project>
