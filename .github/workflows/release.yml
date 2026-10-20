@@ -77,7 +77,7 @@ jobs:
         run: brew install libavif
 
       - name: Test
-        run: dotnet test -c Release
+        run: dotnet test -c Release --output Detailed
 
       - name: Publish
         run: |
