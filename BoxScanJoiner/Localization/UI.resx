@@ -70,7 +70,7 @@
     <value>{0}: {1}/{2}</value>
   </data>
   <data name="PairAccepted" xml:space="preserve">
-    <value>{0} + {1}: {2} matches, {3} inliers, scale {4:F4}, rotation {5:F2}°, error {6:F2} px alone / {7:F2} px aligned</value>
+    <value>{0} + {1}: {2} matches, {3} inliers, scale {4:F4}, rotation {5:F2}°, error {6:F2} px alone / {7:F2} px aligned, {8} of overlap agrees</value>
   </data>
   <data name="PairRejected" xml:space="preserve">
     <value>{0} + {1}: {2} matches, no overlap</value>
@@ -98,5 +98,14 @@
   </data>
   <data name="Saved" xml:space="preserve">
     <value>Saved {0}</value>
+  </data>
+  <data name="PairDisagrees" xml:space="preserve">
+    <value>{0} + {1}: {2} matches, rejected: only {3:P0} of the supposed overlap agrees (same artwork on different sides?)</value>
+  </data>
+  <data name="NotMeasured" xml:space="preserve">
+    <value>n/a</value>
+  </data>
+  <data name="CropOptionDescription" xml:space="preserve">
+    <value>Crop to the box and straighten it, or keep everything scanned including the scanner lid.</value>
   </data>
 </root>

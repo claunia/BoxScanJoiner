@@ -23,7 +23,7 @@
                 <TextBlock Text="{x:Static loc:UI.OptionsHeader}"
                            FontWeight="SemiBold" />
                 <Grid ColumnDefinitions="Auto,8,*"
-                      RowDefinitions="Auto,6,Auto,6,Auto,6,Auto,6,Auto">
+                      RowDefinitions="Auto,6,Auto,6,Auto,6,Auto,6,Auto,6,Auto">
                     <TextBlock Grid.Row="0"
                                VerticalAlignment="Center"
                                Text="{x:Static loc:UI.DetectorLabel}" />
@@ -66,8 +66,18 @@
 
                     <TextBlock Grid.Row="8"
                                VerticalAlignment="Center"
+                               Text="{x:Static loc:UI.CropLabel}" />
+                    <ComboBox Grid.Row="8"
+                              Grid.Column="2"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Crops}"
+                              SelectedItem="{Binding Crop}"
+                              IsEnabled="{Binding !IsBusy}" />
+
+                    <TextBlock Grid.Row="10"
+                               VerticalAlignment="Center"
                                Text="{x:Static loc:UI.MaxDimensionLabel}" />
-                    <NumericUpDown Grid.Row="8"
+                    <NumericUpDown Grid.Row="10"
                                    Grid.Column="2"
                                    Minimum="500"
                                    Maximum="10000"

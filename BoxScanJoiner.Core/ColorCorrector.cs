@@ -24,10 +24,10 @@ internal static class ColorCorrector
     const int MAX_VALUE = 251;
 
     /// <summary>Strength of the pull towards gain 1 and offset 0, relative to the data.</summary>
-    const double PRIOR_WEIGHT = 0.001;
+    const double PRIOR_WEIGHT = 0.0005;
 
-    /// <summary>Fraction of the largest residuals discarded before the second solve.</summary>
-    const double OUTLIER_FRACTION = 0.1;
+    /// <summary>Number of quantiles of each overlap's value distribution that are matched.</summary>
+    const int QUANTILES = 49;
 
     /// <summary>Fits a correction for every image; the image with index <paramref name="reference" /> stays unchanged.</summary>
     public static Dictionary<int, ColorCorrection> Fit(IReadOnlyList<WarpedImage> images, int reference)
@@ -62,18 +62,7 @@ internal static class ColorCorrector
         {
             for(var channel = 0; channel < 3; channel++)
             {
-                double[] x = Solve(samples, column, channel, null, 0);
-
-                double[] residuals = samples.SelectMany(s => Residuals(s, column, channel, x))
-                                            .Select(Math.Abs)
-                                            .Order()
-                                            .ToArray();
-
-                if(residuals.Length > 0)
-                {
-                    double limit = residuals[(int)((residuals.Length - 1) * (1 - OUTLIER_FRACTION))];
-                    x = Solve(samples, column, channel, x, limit);
-                }
+                double[] x = Solve(samples, column, channel);
 
                 foreach((int index, int c) in column)
                 {
@@ -221,25 +210,13 @@ internal static class ColorCorrector
         return mask;
     }
 
-    static IEnumerable<double> Residuals(Samples s, Dictionary<int, int> column, int channel, double[] x)
-    {
-        for(var k = 0; k < s.Count; k++)
-        {
-            yield return Corrected(s.First,  s.A[k * 3 + channel], column, x) -
-                         Corrected(s.Second, s.B[k * 3 + channel], column, x);
-        }
-    }
-
-    static double Corrected(int image, double value, Dictionary<int, int> column, double[] x) =>
-        column.TryGetValue(image, out int c) ? x[c] * value + x[c + 1] : value;
-
     /// <summary>
-    ///     Least-squares fit of gain and offset for one channel from <c>g_i·a + o_i = g_j·b + o_j</c>. When
-    ///     <paramref name="previous" /> is given, samples whose residual under it exceeds <paramref name="limit" /> are
-    ///     ignored.
+    ///     Least-squares fit of gain and offset for one channel from <c>g_i·a + o_i = g_j·b + o_j</c>, applied to
+    ///     matching quantiles of the two scans' values in each overlap. Comparing distributions rather than single
+    ///     pixels is insensitive to small misalignments, and unlike pixel-wise regression it does not pull the gain
+    ///     towards zero when an overlap holds only a narrow range of values.
     /// </summary>
-    static double[] Solve(List<Samples> samples, Dictionary<int, int> column, int channel, double[]? previous,
-                          double        limit)
+    static double[] Solve(List<Samples> samples, Dictionary<int, int> column, int channel)
     {
         int size = column.Count * 2;
         var ata  = new double[size, size];
@@ -254,46 +231,45 @@ internal static class ColorCorrector
             bool hasI = column.TryGetValue(s.First,  out int ci);
             bool hasJ = column.TryGetValue(s.Second, out int cj);
 
-            for(var k = 0; k < s.Count; k++)
+            double[] a = Quantiles(s.A, channel, s.Count);
+            double[] b = Quantiles(s.B, channel, s.Count);
+
+            // Each overlap counts in proportion to its size
+            double weight = (double)s.Count / QUANTILES;
+
+            for(var q = 0; q < QUANTILES; q++)
             {
-                double a = s.A[k * 3 + channel];
-                double b = s.B[k * 3 + channel];
-
-                if(previous is not null &&
-                   Math.Abs(Corrected(s.First, a, column, previous) - Corrected(s.Second, b, column, previous)) > limit)
-                    continue;
-
                 // Row: [a, 1] for i, [-b, -1] for j; reference values move to the right-hand side
                 var    n   = 0;
                 double rhs = 0;
 
                 if(hasI)
                 {
-                    idx[n]    = ci;
-                    coef[n++] = a;
-                    idx[n]    = ci + 1;
-                    coef[n++] = 1;
-                    used[ci]++;
+                    idx[n]    =  ci;
+                    coef[n++] =  a[q];
+                    idx[n]    =  ci + 1;
+                    coef[n++] =  1;
+                    used[ci]  += weight;
                 }
                 else
-                    rhs -= a;
+                    rhs -= a[q];
 
                 if(hasJ)
                 {
-                    idx[n]    = cj;
-                    coef[n++] = -b;
-                    idx[n]    = cj + 1;
-                    coef[n++] = -1;
-                    used[cj]++;
+                    idx[n]    =  cj;
+                    coef[n++] =  -b[q];
+                    idx[n]    =  cj + 1;
+                    coef[n++] =  -1;
+                    used[cj]  += weight;
                 }
                 else
-                    rhs += b;
+                    rhs += b[q];
 
                 for(var r = 0; r < n; r++)
                 {
-                    atb[idx[r]] += coef[r] * rhs;
+                    atb[idx[r]] += weight * coef[r] * rhs;
 
-                    for(var c = 0; c < n; c++) ata[idx[r], idx[c]] += coef[r] * coef[c];
+                    for(var c = 0; c < n; c++) ata[idx[r], idx[c]] += weight * coef[r] * coef[c];
                 }
             }
         }
@@ -314,6 +290,30 @@ internal static class ColorCorrector
         if(!Cv2.Solve(lhs, rhsM, x, DecompTypes.Cholesky)) Cv2.Solve(lhs, rhsM, x, DecompTypes.SVD);
 
         x.GetArray(out double[] result);
+
+        return result;
+    }
+
+    /// <summary>Evenly spaced quantiles, from 2% to 98%, of one channel of interleaved BGR samples.</summary>
+    static double[] Quantiles(byte[] bgr, int channel, int count)
+    {
+        // Counting sort, values are bytes
+        var histogram = new int[256];
+
+        for(var k = 0; k < count; k++) histogram[bgr[k * 3 + channel]]++;
+
+        var result     = new double[QUANTILES];
+        var cumulative = 0;
+        var value      = 0;
+
+        for(var q = 0; q < QUANTILES; q++)
+        {
+            double target = (q + 1) / (QUANTILES + 1.0) * count;
+
+            while(value < 255 && cumulative + histogram[value] < target) cumulative += histogram[value++];
+
+            result[q] = value;
+        }
 
         return result;
     }

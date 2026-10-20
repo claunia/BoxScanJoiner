@@ -33,6 +33,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         Seam         = Seams[0];
         Color        = Colors[0];
         Background   = Backgrounds[0];
+        Crop         = Crops[0];
         MaxDimension = defaults.MaxDetectionDimension;
 
         Scans.CollectionChanged += (_, _) => JoinCommand.NotifyCanExecuteChanged();
@@ -58,6 +59,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
             new(ColorMode.GainOffset, UI.Color_GainOffset), new(ColorMode.None, UI.Color_None)
         ];
 
+    public IReadOnlyList<Choice<CropMode>> Crops { get; } =
+        [
+            new(CropMode.Box, UI.Crop_Box), new(CropMode.None, UI.Crop_None)
+        ];
+
     public IReadOnlyList<Choice<BackgroundFill>> Backgrounds { get; } =
         [
             new(BackgroundFill.White, UI.Background_White), new(BackgroundFill.Black, UI.Background_Black),
@@ -75,6 +81,9 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 
     [ObservableProperty]
     public partial Choice<BackgroundFill> Background { get; set; }
+
+    [ObservableProperty]
+    public partial Choice<CropMode> Crop { get; set; }
 
     [ObservableProperty]
     public partial decimal? MaxDimension { get; set; }
@@ -162,6 +171,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
             Seam                  = Seam.Value,
             Color                 = Color.Value,
             Background            = Background.Value,
+            Crop                  = Crop.Value,
             MaxDetectionDimension = (int)(MaxDimension ?? new StitchOptions().MaxDetectionDimension)
         };
 
@@ -212,16 +222,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             foreach(PairInfo pair in result.Pairs)
             {
-                Diagnostics.Add(string.Format(CultureInfo.CurrentCulture,
-                                              pair.Accepted ? UI.PairAccepted : UI.PairRejected,
-                                              names[pair.First],
-                                              names[pair.Second],
-                                              pair.Matches,
-                                              pair.Inliers,
-                                              pair.Scale,
-                                              pair.AngleDegrees,
-                                              pair.FitError,
-                                              pair.AlignedError));
+                Diagnostics.Add(DescribePair(pair, names));
             }
 
             for(var i = 0; i < names.Length; i++)
@@ -304,6 +305,31 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
         {
             IsBusy = false;
         }
+    }
+
+    static string DescribePair(PairInfo pair, string[] names)
+    {
+        string first  = names[pair.First];
+        string second = names[pair.Second];
+
+        if(pair.Accepted)
+        {
+            return string.Format(CultureInfo.CurrentCulture,
+                                 UI.PairAccepted,
+                                 first,
+                                 second,
+                                 pair.Matches,
+                                 pair.Inliers,
+                                 pair.Scale,
+                                 pair.AngleDegrees,
+                                 pair.FitError,
+                                 pair.AlignedError,
+                                 pair.Agreement?.ToString("P0", CultureInfo.CurrentCulture) ?? UI.NotMeasured);
+        }
+
+        return pair.Agreement is {} agreement
+                   ? string.Format(CultureInfo.CurrentCulture, UI.PairDisagrees, first, second, pair.Matches, agreement)
+                   : string.Format(CultureInfo.CurrentCulture, UI.PairRejected,  first, second, pair.Matches);
     }
 
     static string FormatTriple(double[] bgr, string format) =>

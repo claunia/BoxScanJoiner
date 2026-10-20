@@ -23,7 +23,7 @@ public class PoseGraphTests
         {
             for(int j = i + 1; j < placements.Length; j++)
             {
-                if(FeatureMatcher.Match(i, features[i], j, features[j], options, out _) is {} m) pairs.Add(m);
+                if(FeatureMatcher.Match(i, features[i], j, features[j], options, out _, out _) is {} m) pairs.Add(m);
             }
         }
 

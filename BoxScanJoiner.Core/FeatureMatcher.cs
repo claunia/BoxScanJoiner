@@ -12,7 +12,17 @@ internal sealed class ImageFeatures : IDisposable
     /// <summary>Detection scale relative to the full-resolution image (≤ 1).</summary>
     public required double Scale { get; init; }
 
-    public void Dispose() => Descriptors.Dispose();
+    /// <summary>Small blurred grayscale copy used to verify overlaps.</summary>
+    public required Mat Preview { get; init; }
+
+    /// <summary>Scale of <see cref="Preview" /> relative to the full-resolution image.</summary>
+    public required double PreviewScale { get; init; }
+
+    public void Dispose()
+    {
+        Descriptors.Dispose();
+        Preview.Dispose();
+    }
 }
 
 /// <summary>Verified correspondence between two scans.</summary>
@@ -64,19 +74,24 @@ internal static class FeatureMatcher
         var             descriptors = new Mat();
         detector.DetectAndCompute(small, null, out KeyPoint[] keyPoints, descriptors);
 
+        (Mat preview, double previewScale) = OverlapCheck.Preview(small);
+
         return new ImageFeatures
         {
-            KeyPoints   = keyPoints,
-            Descriptors = descriptors,
-            Scale       = scale
+            KeyPoints    = keyPoints,
+            Descriptors  = descriptors,
+            Scale        = scale,
+            Preview      = preview,
+            PreviewScale = previewScale * scale
         };
     }
 
     /// <summary>Matches two scans and estimates the similarity between them, or returns null if they do not overlap.</summary>
     public static PairMatch? Match(int     first, ImageFeatures a, int second, ImageFeatures b, StitchOptions options,
-                                   out int goodMatches)
+                                   out int goodMatches, out double? agreement)
     {
         goodMatches = 0;
+        agreement   = null;
 
         if(a.KeyPoints.Length < 2 || b.KeyPoints.Length < 2) return null;
 
@@ -136,6 +151,10 @@ internal static class FeatureMatcher
         }
 
         if(inA.Count < options.MinInliers) return null;
+
+        agreement = OverlapCheck.Agreement(a.Preview, a.PreviewScale, b.Preview, b.PreviewScale, transform);
+
+        if(agreement < options.MinOverlapAgreement) return null;
 
         return new PairMatch
         {

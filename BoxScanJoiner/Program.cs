@@ -30,6 +30,12 @@ static class Program
         ["none"] = ColorMode.None
     };
 
+    static readonly Dictionary<string, CropMode> Crops = new()
+    {
+        ["box"]  = CropMode.Box,
+        ["none"] = CropMode.None
+    };
+
     static readonly Dictionary<string, BackgroundFill> Backgrounds = new()
     {
         ["white"]       = BackgroundFill.White,
@@ -59,6 +65,7 @@ static class Program
         Option<string> seam       = Choice("--seam",       UI.SeamOptionDescription,       Seams,       "cut");
         Option<string> color      = Choice("--color",      UI.ColorOptionDescription,      Colors,      "gain");
         Option<string> background = Choice("--background", UI.BackgroundOptionDescription, Backgrounds, "white");
+        Option<string> crop       = Choice("--crop",       UI.CropOptionDescription,       Crops,       "box");
 
         var maxDimension = new Option<int>("--max-dim")
         {
@@ -85,6 +92,7 @@ static class Program
             seam,
             color,
             background,
+            crop,
             maxDimension,
             minInliers,
             debug
@@ -98,6 +106,7 @@ static class Program
                 Seam                  = Seams[parse.GetValue(seam)!],
                 Color                 = Colors[parse.GetValue(color)!],
                 Background            = Backgrounds[parse.GetValue(background)!],
+                Crop                  = Crops[parse.GetValue(crop)!],
                 MaxDetectionDimension = parse.GetValue(maxDimension),
                 MinInliers            = parse.GetValue(minInliers),
                 DebugDirectory        = parse.GetValue(debug)?.FullName
@@ -152,15 +161,7 @@ static class Program
         {
             foreach(PairInfo pair in result.Pairs)
             {
-                Console.WriteLine(pair.Accepted ? UI.PairAccepted : UI.PairRejected,
-                                  names[pair.First],
-                                  names[pair.Second],
-                                  pair.Matches,
-                                  pair.Inliers,
-                                  pair.Scale,
-                                  pair.AngleDegrees,
-                                  pair.FitError,
-                                  pair.AlignedError);
+                Console.WriteLine(DescribePair(pair, names));
             }
 
             for(var i = 0; i < names.Length; i++)
@@ -212,6 +213,31 @@ static class Program
 
             return 0;
         }
+    }
+
+    static string DescribePair(PairInfo pair, string[] names)
+    {
+        string first  = names[pair.First];
+        string second = names[pair.Second];
+
+        if(pair.Accepted)
+        {
+            return string.Format(CultureInfo.CurrentCulture,
+                                 UI.PairAccepted,
+                                 first,
+                                 second,
+                                 pair.Matches,
+                                 pair.Inliers,
+                                 pair.Scale,
+                                 pair.AngleDegrees,
+                                 pair.FitError,
+                                 pair.AlignedError,
+                                 pair.Agreement?.ToString("P0", CultureInfo.CurrentCulture) ?? UI.NotMeasured);
+        }
+
+        return pair.Agreement is {} agreement
+                   ? string.Format(CultureInfo.CurrentCulture, UI.PairDisagrees, first, second, pair.Matches, agreement)
+                   : string.Format(CultureInfo.CurrentCulture, UI.PairRejected,  first, second, pair.Matches);
     }
 
     /// <summary>Formats a BGR triple as R/G/B, the order people expect.</summary>

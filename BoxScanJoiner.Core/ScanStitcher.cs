@@ -86,7 +86,7 @@ public static class ScanStitcher
 
             pairInfo = pairInfo.Select(p => Describe(p, matches, graph.Poses)).ToList();
 
-            (Similarity?[] canvasPoses, Size canvasSize) = PlaceOnCanvas(images, graph.Poses);
+            (Similarity?[] canvasPoses, Size canvasSize) = Frame(images, graph.Poses, options.Crop);
 
             if(options.DebugDirectory is not null) WriteMatchImages(images, features, matches, options.DebugDirectory);
 
@@ -96,7 +96,7 @@ public static class ScanStitcher
             {
                 var corrections = new ColorCorrection?[images.Count];
 
-                if(options.Color == ColorMode.GainOffset && warped.Count > 1)
+                if(options.Color != ColorMode.None && warped.Count > 1)
                 {
                     progress?.Report(new StitchProgress(StitchStage.ColorCorrecting, 0, warped.Count));
 
@@ -195,8 +195,19 @@ public static class ScanStitcher
                      k =>
                      {
                          (int i, int j) = pairs[k];
-                         results[k]     = FeatureMatcher.Match(i, features[i], j, features[j], options, out int good);
-                         info[k]        = new PairInfo(i, j, good, results[k]?.Inliers ?? 0);
+
+                         results[k] = FeatureMatcher.Match(i,
+                                                           features[i],
+                                                           j,
+                                                           features[j],
+                                                           options,
+                                                           out int good,
+                                                           out double? agreement);
+
+                         info[k] = new PairInfo(i, j, good, results[k]?.Inliers ?? 0)
+                         {
+                             Agreement = agreement
+                         };
 
                          progress?.Report(new StitchProgress(StitchStage.Matching,
                                                              Interlocked.Increment(ref done),
@@ -214,6 +225,7 @@ public static class ScanStitcher
 
         return info with
         {
+            Transform = match.SecondToFirst,
             Scale = match.SecondToFirst.Scale,
             AngleDegrees = match.SecondToFirst.AngleDegrees,
             FitError = PoseGraph.PairRmsError(Similarity.Identity, match.SecondToFirst, match),
@@ -227,6 +239,15 @@ public static class ScanStitcher
     [
         new(0, 0), new(image.Width, 0), new(0, image.Height), new(image.Width, image.Height)
     ];
+
+    /// <summary>Chooses the output frame: the straightened box, or everything scanned.</summary>
+    static (Similarity?[] poses, Size size) Frame(IReadOnlyList<Mat> images, Similarity?[] poses, CropMode crop)
+    {
+        if(crop != CropMode.Box || BoxFinder.Find(images, poses) is not var (frame, size))
+            return PlaceOnCanvas(images, poses);
+
+        return (poses.Select(p => p.HasValue ? frame.After(p.Value) : (Similarity?)null).ToArray(), size);
+    }
 
     /// <summary>Shifts every pose so all placed scans land in positive coordinates, and sizes the canvas.</summary>
     static (Similarity?[] poses, Size size) PlaceOnCanvas(IReadOnlyList<Mat> images, Similarity?[] poses)
@@ -270,6 +291,9 @@ public static class ScanStitcher
                 var y1 = (int)Math.Ceiling(placed.Max(p => p.Y));
 
                 Rect roi = Rect.FromLTRB(x0, y0, x1, y1).Intersect(canvas);
+
+                // Entirely cropped away
+                if(roi.Width <= 0 || roi.Height <= 0) continue;
 
                 using Mat m = new Similarity(1, 0, -roi.X, -roi.Y).After(pose).ToMat();
 

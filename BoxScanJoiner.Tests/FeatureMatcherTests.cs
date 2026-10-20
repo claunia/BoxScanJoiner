@@ -32,7 +32,7 @@ public class FeatureMatcherTests
         using ImageFeatures fa = FeatureMatcher.Detect(tileA, options);
         using ImageFeatures fb = FeatureMatcher.Detect(tileB, options);
 
-        PairMatch? match = FeatureMatcher.Match(0, fa, 1, fb, options, out _);
+        PairMatch? match = FeatureMatcher.Match(0, fa, 1, fb, options, out _, out _);
 
         Assert.NotNull(match);
 
@@ -55,6 +55,6 @@ public class FeatureMatcherTests
         using ImageFeatures fa = FeatureMatcher.Detect(tileA, options);
         using ImageFeatures fb = FeatureMatcher.Detect(tileB, options);
 
-        Assert.Null(FeatureMatcher.Match(0, fa, 1, fb, options, out _));
+        Assert.Null(FeatureMatcher.Match(0, fa, 1, fb, options, out _, out _));
     }
 }

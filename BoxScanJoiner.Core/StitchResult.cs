@@ -9,6 +9,15 @@ namespace BoxScanJoiner.Core;
 /// <param name="Inliers">Matches consistent with the estimated transform, 0 if rejected.</param>
 public sealed record PairInfo(int First, int Second, int Matches, int Inliers)
 {
+    /// <summary>
+    ///     Fraction of the overlap where the aligned scans look alike, null if it was not measured or the overlap has
+    ///     too little texture to tell.
+    /// </summary>
+    public double? Agreement { get; init; }
+
+    /// <summary>Transform from the second scan to the first, null if the pair was rejected.</summary>
+    public Similarity? Transform { get; init; }
+
     /// <summary>Scale between the two scans, ideally 1.</summary>
     public double Scale { get; init; } = 1;
 
