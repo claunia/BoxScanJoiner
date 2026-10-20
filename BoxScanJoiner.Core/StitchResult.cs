@@ -9,6 +9,18 @@ namespace BoxScanJoiner.Core;
 /// <param name="Inliers">Matches consistent with the estimated transform, 0 if rejected.</param>
 public sealed record PairInfo(int First, int Second, int Matches, int Inliers)
 {
+    /// <summary>Scale between the two scans, ideally 1.</summary>
+    public double Scale { get; init; } = 1;
+
+    /// <summary>Rotation from the second scan to the first, in degrees.</summary>
+    public double AngleDegrees { get; init; }
+
+    /// <summary>RMS distance between matched points under the best transform for this pair alone, in pixels.</summary>
+    public double FitError { get; init; }
+
+    /// <summary>RMS distance between matched points after all scans are aligned together, in pixels.</summary>
+    public double AlignedError { get; init; }
+
     public bool Accepted => Inliers > 0;
 }
 

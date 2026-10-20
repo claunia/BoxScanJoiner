@@ -84,6 +84,8 @@ public static class ScanStitcher
             PoseGraphResult graph = PoseGraph.Solve(images.Count, matches);
             progress?.Report(new StitchProgress(StitchStage.Aligning, 1, 1));
 
+            pairInfo = pairInfo.Select(p => Describe(p, matches, graph.Poses)).ToList();
+
             (Similarity?[] canvasPoses, Size canvasSize) = PlaceOnCanvas(images, graph.Poses);
 
             if(options.DebugDirectory is not null) WriteMatchImages(images, features, matches, options.DebugDirectory);
@@ -202,6 +204,23 @@ public static class ScanStitcher
                      });
 
         return (results.OfType<PairMatch>().ToList(), info.ToList());
+    }
+
+    static PairInfo Describe(PairInfo info, List<PairMatch> matches, Similarity?[] poses)
+    {
+        PairMatch? match = matches.Find(m => m.First == info.First && m.Second == info.Second);
+
+        if(match is null) return info;
+
+        return info with
+        {
+            Scale = match.SecondToFirst.Scale,
+            AngleDegrees = match.SecondToFirst.AngleDegrees,
+            FitError = PoseGraph.PairRmsError(Similarity.Identity, match.SecondToFirst, match),
+            AlignedError = poses[info.First] is {} pi && poses[info.Second] is {} pj
+                               ? PoseGraph.PairRmsError(pi, pj, match)
+                               : 0
+        };
     }
 
     static Point2d[] Corners(Mat image) =>

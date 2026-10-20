@@ -217,7 +217,11 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
                                               names[pair.First],
                                               names[pair.Second],
                                               pair.Matches,
-                                              pair.Inliers));
+                                              pair.Inliers,
+                                              pair.Scale,
+                                              pair.AngleDegrees,
+                                              pair.FitError,
+                                              pair.AlignedError));
             }
 
             for(var i = 0; i < names.Length; i++)

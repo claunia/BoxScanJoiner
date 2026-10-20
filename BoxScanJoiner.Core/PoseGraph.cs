@@ -188,15 +188,28 @@ internal static class PoseGraph
         {
             if(poses[pair.First] is not {} pi || poses[pair.Second] is not {} pj) continue;
 
-            for(var k = 0; k < pair.Inliers; k++)
-            {
-                Point2d a = pi.Apply(pair.FirstPoints[k]);
-                Point2d b = pj.Apply(pair.SecondPoints[k]);
-                sum += (a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y);
-                count++;
-            }
+            sum   += SquaredError(pi, pj, pair);
+            count += pair.Inliers;
         }
 
         return count == 0 ? 0 : Math.Sqrt(sum / count);
+    }
+
+    /// <summary>RMS distance between the pair's matched points when the two scans are placed with these poses.</summary>
+    public static double PairRmsError(Similarity firstPose, Similarity secondPose, PairMatch pair) =>
+        pair.Inliers == 0 ? 0 : Math.Sqrt(SquaredError(firstPose, secondPose, pair) / pair.Inliers);
+
+    static double SquaredError(Similarity firstPose, Similarity secondPose, PairMatch pair)
+    {
+        double sum = 0;
+
+        for(var k = 0; k < pair.Inliers; k++)
+        {
+            Point2d a = firstPose.Apply(pair.FirstPoints[k]);
+            Point2d b = secondPose.Apply(pair.SecondPoints[k]);
+            sum += (a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y);
+        }
+
+        return sum;
     }
 }
