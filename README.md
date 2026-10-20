@@ -147,10 +147,46 @@ full-resolution images.
 
 ## Installing
 
-Box Scan Joiner runs on Linux and Windows (x64), and needs the
-[.NET 10 SDK](https://dotnet.microsoft.com/download).
+Box Scan Joiner runs on Linux, Windows and macOS, on both Intel/AMD (x64) and
+ARM (arm64) processors.
 
-To build it from source:
+The easiest way to get it is from the
+[releases page](https://github.com/claunia/BoxScanJoiner/releases). Pick the
+file for your system:
+
+| System | File |
+|---|---|
+| Windows on Intel/AMD | `BoxScanJoiner-<version>-win-x64.zip` |
+| Windows on ARM | `BoxScanJoiner-<version>-win-arm64.zip` |
+| Linux on Intel/AMD | `BoxScanJoiner-<version>-linux-x64.tar.gz` |
+| Linux on ARM | `BoxScanJoiner-<version>-linux-arm64.tar.gz` |
+| Mac with Apple silicon (M1 and later) | `BoxScanJoiner-<version>-osx-arm64.tar.gz` |
+| Mac with Intel processor | `BoxScanJoiner-<version>-osx-x64.tar.gz` |
+
+Unpack it anywhere. It contains both programs, `BoxScanJoiner.Gui` (the window
+app) and `BoxScanJoiner` (the command-line tool), and on most systems needs
+nothing else installed. The exceptions:
+
+- **Linux** needs GTK 3, which every desktop already has.
+- **Linux on ARM** is built for Ubuntu 24.04 and needs a few more libraries:
+
+  ```
+  sudo apt install libgtk-3-0t64 libtesseract5 libavcodec60 libavformat60 libavutil58 libswscale7 \
+    libjpeg-turbo8 libpng16-16t64 libtiff6 libwebp7 libwebpmux3 libwebpdemux2
+  ```
+
+- **Mac with Intel processor** needs `libavif` from [Homebrew](https://brew.sh):
+  `brew install libavif`.
+- **macOS** blocks programs downloaded from the internet that aren't signed by
+  Apple. After unpacking, allow them once from the folder you unpacked into:
+
+  ```
+  xattr -dr com.apple.quarantine .
+  ```
+
+### Building from source
+
+Building needs the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
 ```
 git clone https://github.com/claunia/BoxScanJoiner
@@ -175,7 +211,8 @@ dotnet publish BoxScanJoiner     -c Release -r linux-x64 -o out/cli
 dotnet publish BoxScanJoiner.Gui -c Release -r linux-x64 -o out/gui
 ```
 
-Use `-r win-x64` for Windows. Each app is published as a single executable
+Use `-r` with `linux-arm64`, `win-x64`, `win-arm64`, `osx-x64` or `osx-arm64`
+for the other systems. Each app is published as a single executable
 file, `BoxScanJoiner` or `BoxScanJoiner.Gui` (with `.exe` on Windows). The file
 contains the .NET runtime, OpenCV and everything else it needs, so it can be
 copied to any computer of the same kind and run there without installing

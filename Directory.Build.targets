@@ -1,0 +1,23 @@
+<Project>
+  <!--
+    OpenCV's native library comes in one package per platform. Apps and tests take the one for the runtime they are
+    published for, or for the machine building them when no runtime is given.
+  -->
+  <PropertyGroup Condition="'$(OutputType)' != 'Library'">
+    <OpenCvRuntime>$(RuntimeIdentifier)</OpenCvRuntime>
+    <_OpenCvHostArch>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OpenCvHostArch>
+    <_OpenCvHostArch>$(_OpenCvHostArch.ToLowerInvariant())</_OpenCvHostArch>
+    <OpenCvRuntime Condition="'$(OpenCvRuntime)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">win-$(_OpenCvHostArch)</OpenCvRuntime>
+    <OpenCvRuntime Condition="'$(OpenCvRuntime)' == '' and $([MSBuild]::IsOSPlatform('OSX'))">osx-$(_OpenCvHostArch)</OpenCvRuntime>
+    <OpenCvRuntime Condition="'$(OpenCvRuntime)' == ''">linux-$(_OpenCvHostArch)</OpenCvRuntime>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(OutputType)' != 'Library'">
+    <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64" Condition="'$(OpenCvRuntime)' == 'linux-x64'"/>
+    <PackageReference Include="OpenCvSharp4.runtime.linux-arm64" Condition="'$(OpenCvRuntime)' == 'linux-arm64'"/>
+    <PackageReference Include="OpenCvSharp4.runtime.win" Condition="'$(OpenCvRuntime)' == 'win-x64'"/>
+    <PackageReference Include="OpenCvSharp4.runtime.win-arm64" Condition="'$(OpenCvRuntime)' == 'win-arm64'"/>
+    <PackageReference Include="OpenCvSharp4.runtime.osx.x64" Condition="'$(OpenCvRuntime)' == 'osx-x64'"/>
+    <PackageReference Include="OpenCvSharp4.runtime.osx.arm64" Condition="'$(OpenCvRuntime)' == 'osx-arm64'"/>
+  </ItemGroup>
+</Project>

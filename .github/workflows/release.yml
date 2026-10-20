@@ -1,0 +1,125 @@
+name: Release
+
+# Pushing a tag such as v1.0.0 builds, tests and publishes a GitHub release.
+# Running the workflow by hand builds the same packages as workflow artifacts only.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build ${{ matrix.rid }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            rid: linux-x64
+          - os: ubuntu-24.04-arm
+            rid: linux-arm64
+          - os: windows-latest
+            rid: win-x64
+          - os: windows-11-arm
+            rid: win-arm64
+          - os: macos-15-intel
+            rid: osx-x64
+          - os: macos-latest
+            rid: osx-arm64
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Work out version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="0.0.0-ci.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "PACKAGE=BoxScanJoiner-$version-${{ matrix.rid }}" >> "$GITHUB_ENV"
+
+      # OpenCV's Linux and Intel macOS builds link against system libraries that the runners may lack
+      - name: Install OpenCV dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-0t64 libtesseract5 libavcodec60 libavformat60 libavutil58 libswscale7 \
+            libjpeg-turbo8 libpng16-16t64 libtiff6 libwebp7 libwebpmux3 libwebpdemux2
+
+      - name: Install OpenCV dependencies (macOS)
+        if: matrix.rid == 'osx-x64'
+        run: brew install libavif
+
+      - name: Test
+        run: dotnet test -c Release
+
+      - name: Publish
+        run: |
+          for project in BoxScanJoiner BoxScanJoiner.Gui; do
+            dotnet publish "$project" -c Release -r ${{ matrix.rid }} -p:Version="$VERSION" -o "publish/$project"
+          done
+
+          mkdir -p "dist/$PACKAGE"
+          find publish -maxdepth 2 -type f ! -name '*.pdb' -exec cp {} "dist/$PACKAGE/" \;
+          cp README.md LICENSE "dist/$PACKAGE/"
+
+      - name: Package
+        working-directory: dist
+        run: |
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            7z a -tzip "$PACKAGE.zip" "$PACKAGE"
+          else
+            tar -czf "$PACKAGE.tar.gz" "$PACKAGE"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  release:
+    name: Release
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prerelease=()
+          [[ "$GITHUB_REF_NAME" == *-* ]] && prerelease=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Box Scan Joiner ${GITHUB_REF_NAME#v}" \
+            --generate-notes \
+            "${prerelease[@]}"
