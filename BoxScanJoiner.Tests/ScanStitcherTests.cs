@@ -58,7 +58,8 @@ public class ScanStitcherTests
                                                                 Seam                  = seam,
                                                                 Color                 = ColorMode.None,
                                                                 Background            = BackgroundFill.Transparent
-                                                            });
+                                                            },
+                                                            cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Equal(4, result.PlacedImages);
             Assert.Empty(result.UnconnectedImages);
@@ -102,7 +103,8 @@ public class ScanStitcherTests
 
         try
         {
-            using StitchResult result = ScanStitcher.Stitch(tiles);
+            using StitchResult result =
+                ScanStitcher.Stitch(tiles, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Equal(2,   result.PlacedImages);
             Assert.Equal([2], result.UnconnectedImages);
@@ -127,7 +129,8 @@ public class ScanStitcherTests
                                                             new StitchOptions
                                                             {
                                                                 DebugDirectory = dir
-                                                            });
+                                                            },
+                                                            cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.True(File.Exists(Path.Combine(dir, "matches_0_1.jpg")));
             Assert.True(File.Exists(Path.Combine(dir, "seams.jpg")));

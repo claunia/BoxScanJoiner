@@ -22,6 +22,9 @@ public sealed class StitchResult : IDisposable
 
     public required IReadOnlyList<PairInfo> Pairs { get; init; }
 
+    /// <summary>Color correction applied to each scan, null where none was applied or the scan was not placed.</summary>
+    public required IReadOnlyList<ColorCorrection?> ColorCorrections { get; init; }
+
     /// <summary>Index of the scan whose orientation the output follows.</summary>
     public required int Reference { get; init; }
 

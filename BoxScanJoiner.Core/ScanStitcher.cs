@@ -92,6 +92,27 @@ public static class ScanStitcher
 
             try
             {
+                var corrections = new ColorCorrection?[images.Count];
+
+                if(options.Color == ColorMode.GainOffset && warped.Count > 1)
+                {
+                    progress?.Report(new StitchProgress(StitchStage.ColorCorrecting, 0, warped.Count));
+
+                    Dictionary<int, ColorCorrection> fitted = ColorCorrector.Fit(warped, graph.Reference);
+
+                    for(var i = 0; i < warped.Count; i++)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        ColorCorrection correction = fitted[warped[i].Index];
+                        corrections[warped[i].Index] = correction;
+
+                        if(warped[i].Index != graph.Reference) ColorCorrector.Apply(warped[i], correction);
+
+                        progress?.Report(new StitchProgress(StitchStage.ColorCorrecting, i + 1, warped.Count));
+                    }
+                }
+
                 using var compositor = new SeamCompositor(canvasSize);
 
                 for(var i = 0; i < warped.Count; i++)
@@ -108,11 +129,12 @@ public static class ScanStitcher
 
                 return new StitchResult
                 {
-                    Image      = output,
-                    Transforms = canvasPoses,
-                    Pairs      = pairInfo,
-                    Reference  = graph.Reference,
-                    RmsError   = graph.RmsError
+                    Image            = output,
+                    Transforms       = canvasPoses,
+                    ColorCorrections = corrections,
+                    Pairs            = pairInfo,
+                    Reference        = graph.Reference,
+                    RmsError         = graph.RmsError
                 };
             }
             finally
