@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="OpenCvSharp4"/>
+        <PackageReference Include="OpenCvSharp4.official.runtime.linux-x64"/>
+        <PackageReference Include="OpenCvSharp4.runtime.win"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="BoxScanJoiner.Tests"/>
+    </ItemGroup>
+
+</Project>

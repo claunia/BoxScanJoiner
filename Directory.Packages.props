@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <OpenCvSharpVersion>4.13.0.20260627</OpenCvSharpVersion>
+    <AvaloniaVersion>12.1.4</AvaloniaVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="OpenCvSharp4" Version="$(OpenCvSharpVersion)"/>
+    <PackageVersion Include="OpenCvSharp4.official.runtime.linux-x64" Version="$(OpenCvSharpVersion)"/>
+    <PackageVersion Include="OpenCvSharp4.runtime.win" Version="$(OpenCvSharpVersion)"/>
+    <PackageVersion Include="System.CommandLine" Version="2.0.13"/>
+    <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)"/>
+    <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)"/>
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)"/>
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+    <PackageVersion Include="xunit.v3" Version="4.0.2"/>
+  </ItemGroup>
+</Project>

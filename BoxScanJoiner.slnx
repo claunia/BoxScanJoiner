@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BoxScanJoiner.Core/BoxScanJoiner.Core.csproj" />
+  <Project Path="BoxScanJoiner.Gui/BoxScanJoiner.Gui.csproj" />
+  <Project Path="BoxScanJoiner.Tests/BoxScanJoiner.Tests.csproj" />
+  <Project Path="BoxScanJoiner/BoxScanJoiner.csproj" />
+</Solution>
