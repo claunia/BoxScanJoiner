@@ -5,7 +5,20 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="System.CommandLine"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\BoxScanJoiner.Core\BoxScanJoiner.Core.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Update="Localization\UI.resx">
+            <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+            <StronglyTypedNamespace>BoxScanJoiner.Localization</StronglyTypedNamespace>
+            <StronglyTypedClassName>UI</StronglyTypedClassName>
+            <StronglyTypedFileName>$(IntermediateOutputPath)UI.Designer.cs</StronglyTypedFileName>
+        </EmbeddedResource>
     </ItemGroup>
 
 </Project>
