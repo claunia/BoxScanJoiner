@@ -7,6 +7,8 @@
 
     <ItemGroup>
         <PackageReference Include="xunit.v3"/>
+        <PackageReference Include="Avalonia.Headless.XUnit"/>
+        <PackageReference Include="Avalonia.Skia"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -15,6 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\BoxScanJoiner.Core\BoxScanJoiner.Core.csproj"/>
+        <ProjectReference Include="..\BoxScanJoiner.Gui\BoxScanJoiner.Gui.csproj"/>
     </ItemGroup>
 
 </Project>

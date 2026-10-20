@@ -12,7 +12,10 @@
     <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)"/>
     <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)"/>
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)"/>
+    <PackageVersion Include="Avalonia.Headless.XUnit" Version="$(AvaloniaVersion)"/>
+    <PackageVersion Include="Avalonia.Skia" Version="$(AvaloniaVersion)"/>
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
-    <PackageVersion Include="xunit.v3" Version="4.0.2"/>
+    <!-- Avalonia.Headless.XUnit 12 is built against xunit.v3 3.x -->
+    <PackageVersion Include="xunit.v3" Version="3.2.2"/>
   </ItemGroup>
 </Project>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="WindowTitle" xml:space="preserve">
+    <value>Box Scan Joiner</value>
+  </data>
+  <data name="ScansHeader" xml:space="preserve">
+    <value>Scans</value>
+  </data>
+  <data name="DropHint" xml:space="preserve">
+    <value>Drop scans here or use Add…</value>
+  </data>
+  <data name="AddScans" xml:space="preserve">
+    <value>Add…</value>
+  </data>
+  <data name="RemoveScan" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ClearScans" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="OptionsHeader" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="DetectorLabel" xml:space="preserve">
+    <value>Feature detector</value>
+  </data>
+  <data name="SeamLabel" xml:space="preserve">
+    <value>Overlaps</value>
+  </data>
+  <data name="ColorLabel" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="BackgroundLabel" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="MaxDimensionLabel" xml:space="preserve">
+    <value>Detection size (px)</value>
+  </data>
+  <data name="Join" xml:space="preserve">
+    <value>Join</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save as…</value>
+  </data>
+  <data name="ZoomLabel" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+  <data name="FitToWindow" xml:space="preserve">
+    <value>Fit</value>
+  </data>
+  <data name="PreviewPlaceholder" xml:space="preserve">
+    <value>The joined image will appear here.</value>
+  </data>
+  <data name="DiagnosticsHeader" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="Detector_Sift" xml:space="preserve">
+    <value>SIFT (most robust)</value>
+  </data>
+  <data name="Detector_Akaze" xml:space="preserve">
+    <value>AKAZE</value>
+  </data>
+  <data name="Detector_Orb" xml:space="preserve">
+    <value>ORB (fastest)</value>
+  </data>
+  <data name="Seam_OptimalCut" xml:space="preserve">
+    <value>Optimal hard cut</value>
+  </data>
+  <data name="Seam_None" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="Color_GainOffset" xml:space="preserve">
+    <value>Equalize</value>
+  </data>
+  <data name="Color_None" xml:space="preserve">
+    <value>Leave as scanned</value>
+  </data>
+  <data name="Background_White" xml:space="preserve">
+    <value>White</value>
+  </data>
+  <data name="Background_Black" xml:space="preserve">
+    <value>Black</value>
+  </data>
+  <data name="Background_Transparent" xml:space="preserve">
+    <value>Transparent</value>
+  </data>
+  <data name="Stage_Loading" xml:space="preserve">
+    <value>Loading scans</value>
+  </data>
+  <data name="Stage_Detecting" xml:space="preserve">
+    <value>Detecting features</value>
+  </data>
+  <data name="Stage_Matching" xml:space="preserve">
+    <value>Matching scan pairs</value>
+  </data>
+  <data name="Stage_Aligning" xml:space="preserve">
+    <value>Aligning scans</value>
+  </data>
+  <data name="Stage_Warping" xml:space="preserve">
+    <value>Warping scans</value>
+  </data>
+  <data name="Stage_ColorCorrecting" xml:space="preserve">
+    <value>Equalizing colors</value>
+  </data>
+  <data name="Stage_Compositing" xml:space="preserve">
+    <value>Cutting seams</value>
+  </data>
+  <data name="Stage_Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ProgressFormat" xml:space="preserve">
+    <value>{0}: {1}/{2}</value>
+  </data>
+  <data name="PairAccepted" xml:space="preserve">
+    <value>{0} + {1}: {2} matches, {3} inliers</value>
+  </data>
+  <data name="PairRejected" xml:space="preserve">
+    <value>{0} + {1}: {2} matches, no overlap</value>
+  </data>
+  <data name="ColorCorrectionFormat" xml:space="preserve">
+    <value>{0}: gain {1}, offset {2}</value>
+  </data>
+  <data name="UnconnectedWarning" xml:space="preserve">
+    <value>{0} shares no overlap with the other scans and was left out.</value>
+  </data>
+  <data name="NotEnoughConnected" xml:space="preserve">
+    <value>Fewer than two scans could be joined.</value>
+  </data>
+  <data name="NeedTwoScans" xml:space="preserve">
+    <value>Add at least two scans.</value>
+  </data>
+  <data name="CannotReadImage" xml:space="preserve">
+    <value>Cannot read image '{0}'.</value>
+  </data>
+  <data name="CannotWriteImage" xml:space="preserve">
+    <value>Cannot write '{0}'.</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Joined {0} of {1} scans into {2}×{3} pixels, alignment error {4:F2} px, oriented like {5}.</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Saved {0}</value>
+  </data>
+  <data name="Cancelled" xml:space="preserve">
+    <value>Cancelled.</value>
+  </data>
+  <data name="UnexpectedError" xml:space="preserve">
+    <value>Unexpected error: {0}</value>
+  </data>
+  <data name="PickScansTitle" xml:space="preserve">
+    <value>Add scans</value>
+  </data>
+  <data name="SaveTitle" xml:space="preserve">
+    <value>Save joined image</value>
+  </data>
+  <data name="ImagesFileType" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="PngFileType" xml:space="preserve">
+    <value>PNG image</value>
+  </data>
+  <data name="TiffFileType" xml:space="preserve">
+    <value>TIFF image</value>
+  </data>
+  <data name="JpegFileType" xml:space="preserve">
+    <value>JPEG image</value>
+  </data>
+</root>

@@ -1,0 +1,242 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BoxScanJoiner.Gui.ViewModels"
+        xmlns:loc="using:BoxScanJoiner.Gui.Localization"
+        x:Class="BoxScanJoiner.Gui.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{x:Static loc:UI.WindowTitle}"
+        Width="1280"
+        Height="820"
+        MinWidth="900"
+        MinHeight="600">
+
+    <Grid ColumnDefinitions="320,4,*"
+          RowDefinitions="*,Auto">
+
+        <!-- Scans and options -->
+        <DockPanel Grid.Column="0"
+                   Grid.Row="0"
+                   Margin="12">
+            <StackPanel DockPanel.Dock="Bottom"
+                        Spacing="8"
+                        Margin="0,12,0,0">
+                <TextBlock Text="{x:Static loc:UI.OptionsHeader}"
+                           FontWeight="SemiBold" />
+                <Grid ColumnDefinitions="Auto,8,*"
+                      RowDefinitions="Auto,6,Auto,6,Auto,6,Auto,6,Auto">
+                    <TextBlock Grid.Row="0"
+                               VerticalAlignment="Center"
+                               Text="{x:Static loc:UI.DetectorLabel}" />
+                    <ComboBox Grid.Row="0"
+                              Grid.Column="2"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Detectors}"
+                              SelectedItem="{Binding Detector}"
+                              IsEnabled="{Binding !IsBusy}" />
+
+                    <TextBlock Grid.Row="2"
+                               VerticalAlignment="Center"
+                               Text="{x:Static loc:UI.SeamLabel}" />
+                    <ComboBox Grid.Row="2"
+                              Grid.Column="2"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Seams}"
+                              SelectedItem="{Binding Seam}"
+                              IsEnabled="{Binding !IsBusy}" />
+
+                    <TextBlock Grid.Row="4"
+                               VerticalAlignment="Center"
+                               Text="{x:Static loc:UI.ColorLabel}" />
+                    <ComboBox Grid.Row="4"
+                              Grid.Column="2"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Colors}"
+                              SelectedItem="{Binding Color}"
+                              IsEnabled="{Binding !IsBusy}" />
+
+                    <TextBlock Grid.Row="6"
+                               VerticalAlignment="Center"
+                               Text="{x:Static loc:UI.BackgroundLabel}" />
+                    <ComboBox Grid.Row="6"
+                              Grid.Column="2"
+                              HorizontalAlignment="Stretch"
+                              ItemsSource="{Binding Backgrounds}"
+                              SelectedItem="{Binding Background}"
+                              IsEnabled="{Binding !IsBusy}" />
+
+                    <TextBlock Grid.Row="8"
+                               VerticalAlignment="Center"
+                               Text="{x:Static loc:UI.MaxDimensionLabel}" />
+                    <NumericUpDown Grid.Row="8"
+                                   Grid.Column="2"
+                                   Minimum="500"
+                                   Maximum="10000"
+                                   Increment="250"
+                                   FormatString="0"
+                                   Value="{Binding MaxDimension}"
+                                   IsEnabled="{Binding !IsBusy}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,8,*"
+                      Margin="0,8,0,0">
+                    <Button Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Classes="accent"
+                            Content="{x:Static loc:UI.Join}"
+                            Command="{Binding JoinCommand}" />
+                    <Button Grid.Column="2"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Content="{x:Static loc:UI.Cancel}"
+                            Command="{Binding CancelCommand}" />
+                </Grid>
+            </StackPanel>
+
+            <DockPanel DockPanel.Dock="Top"
+                       Margin="0,0,0,8">
+                <TextBlock DockPanel.Dock="Left"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           Text="{x:Static loc:UI.ScansHeader}" />
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            Spacing="6"
+                            HorizontalAlignment="Right">
+                    <Button Content="{x:Static loc:UI.AddScans}"
+                            Command="{Binding AddScansCommand}" />
+                    <Button Content="{x:Static loc:UI.RemoveScan}"
+                            Command="{Binding RemoveScanCommand}"
+                            CommandParameter="{Binding SelectedScan}"
+                            IsEnabled="{Binding !IsBusy}" />
+                    <Button Content="{x:Static loc:UI.ClearScans}"
+                            Command="{Binding ClearScansCommand}"
+                            IsEnabled="{Binding !IsBusy}" />
+                </StackPanel>
+            </DockPanel>
+
+            <Border Name="DropZone"
+                    DragDrop.AllowDrop="True"
+                    CornerRadius="6"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+                <Panel>
+                    <TextBlock Text="{x:Static loc:UI.DropHint}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Opacity="0.6"
+                               TextWrapping="Wrap"
+                               IsVisible="{Binding !Scans.Count}" />
+                    <ListBox ItemsSource="{Binding Scans}"
+                             SelectedItem="{Binding SelectedScan}"
+                             Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ScanItem">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Left"
+                                            Width="64"
+                                            Height="64"
+                                            Margin="0,0,10,0"
+                                            Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+                                        <Image Source="{Binding Thumbnail}"
+                                               Stretch="Uniform" />
+                                    </Border>
+                                    <TextBlock VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Text="{Binding Name}"
+                                               ToolTip.Tip="{Binding Path}" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Panel>
+            </Border>
+        </DockPanel>
+
+        <GridSplitter Grid.Column="1"
+                      Grid.Row="0"
+                      ResizeDirection="Columns" />
+
+        <!-- Preview and diagnostics -->
+        <Grid Grid.Column="2"
+              Grid.Row="0"
+              RowDefinitions="Auto,*,4,150"
+              Margin="12">
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        Margin="0,0,0,8">
+                <TextBlock VerticalAlignment="Center"
+                           Text="{x:Static loc:UI.ZoomLabel}" />
+                <Slider Width="220"
+                        Minimum="0.05"
+                        Maximum="4"
+                        Value="{Binding Zoom}"
+                        VerticalAlignment="Center" />
+                <TextBlock VerticalAlignment="Center"
+                           MinWidth="48"
+                           Text="{Binding Zoom, StringFormat={}{0:P0}}" />
+                <Button Content="{x:Static loc:UI.FitToWindow}"
+                        Click="OnFitClick" />
+                <Button Content="{x:Static loc:UI.Save}"
+                        Command="{Binding SaveCommand}" />
+            </StackPanel>
+
+            <Border Grid.Row="1"
+                    CornerRadius="6"
+                    ClipToBounds="True"
+                    Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
+                <Panel>
+                    <TextBlock Text="{x:Static loc:UI.PreviewPlaceholder}"
+                               Opacity="0.6"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNull}}" />
+                    <ScrollViewer Name="PreviewScroller"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <LayoutTransformControl HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                            <LayoutTransformControl.LayoutTransform>
+                                <ScaleTransform ScaleX="{Binding Zoom}"
+                                                ScaleY="{Binding Zoom}" />
+                            </LayoutTransformControl.LayoutTransform>
+                            <Image Name="PreviewImage"
+                                   Source="{Binding Preview}"
+                                   Stretch="None" />
+                        </LayoutTransformControl>
+                    </ScrollViewer>
+                </Panel>
+            </Border>
+
+            <GridSplitter Grid.Row="2"
+                          ResizeDirection="Rows" />
+
+            <DockPanel Grid.Row="3">
+                <TextBlock DockPanel.Dock="Top"
+                           FontWeight="SemiBold"
+                           Margin="0,4"
+                           Text="{x:Static loc:UI.DiagnosticsHeader}" />
+                <ListBox ItemsSource="{Binding Diagnostics}"
+                         FontFamily="monospace"
+                         FontSize="12" />
+            </DockPanel>
+        </Grid>
+
+        <!-- Status -->
+        <Grid Grid.Row="1"
+              Grid.ColumnSpan="3"
+              ColumnDefinitions="*,240"
+              Margin="12,0,12,10">
+            <TextBlock Grid.Column="0"
+                       VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
+                       Text="{Binding Status}" />
+            <ProgressBar Grid.Column="1"
+                         Minimum="0"
+                         Maximum="100"
+                         Value="{Binding Progress}"
+                         IsVisible="{Binding IsBusy}" />
+        </Grid>
+    </Grid>
+</Window>
