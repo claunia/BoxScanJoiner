@@ -147,8 +147,10 @@ full-resolution images.
 
 ## Installing
 
-Box Scan Joiner runs on Linux, Windows and macOS, on both Intel/AMD (x64) and
-ARM (arm64) processors.
+Box Scan Joiner runs on Linux and Windows, on both Intel/AMD (x64) and ARM
+(arm64) processors, and on Macs with Apple silicon. Macs with Intel processors
+aren't supported, because the OpenCV library it relies on crashes there when
+writing JPEG files.
 
 The easiest way to get it is from the
 [releases page](https://github.com/claunia/BoxScanJoiner/releases). Pick the
@@ -161,7 +163,6 @@ file for your system:
 | Linux on Intel/AMD | `BoxScanJoiner-<version>-linux-x64.tar.gz` |
 | Linux on ARM | `BoxScanJoiner-<version>-linux-arm64.tar.gz` |
 | Mac with Apple silicon (M1 and later) | `BoxScanJoiner-<version>-osx-arm64.tar.gz` |
-| Mac with Intel processor | `BoxScanJoiner-<version>-osx-x64.tar.gz` |
 
 Unpack it anywhere. It contains both programs, `BoxScanJoiner.Gui` (the window
 app) and `BoxScanJoiner` (the command-line tool), and on most systems needs
@@ -175,8 +176,6 @@ nothing else installed. The exceptions:
     libjpeg-turbo8 libpng16-16t64 libtiff6 libwebp7 libwebpmux3 libwebpdemux2
   ```
 
-- **Mac with Intel processor** needs `libavif` from [Homebrew](https://brew.sh):
-  `brew install libavif`.
 - **macOS** blocks programs downloaded from the internet that aren't signed by
   Apple. After unpacking, allow them once from the folder you unpacked into:
 
@@ -211,7 +210,7 @@ dotnet publish BoxScanJoiner     -c Release -r linux-x64 -o out/cli
 dotnet publish BoxScanJoiner.Gui -c Release -r linux-x64 -o out/gui
 ```
 
-Use `-r` with `linux-arm64`, `win-x64`, `win-arm64`, `osx-x64` or `osx-arm64`
+Use `-r` with `linux-arm64`, `win-x64`, `win-arm64` or `osx-arm64`
 for the other systems. Each app is published as a single executable
 file, `BoxScanJoiner` or `BoxScanJoiner.Gui` (with `.exe` on Windows). The file
 contains the .NET runtime, OpenCV and everything else it needs, so it can be

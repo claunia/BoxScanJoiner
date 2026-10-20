@@ -31,8 +31,6 @@ jobs:
             rid: win-x64
           - os: windows-11-arm
             rid: win-arm64
-          - os: macos-15-intel
-            rid: osx-x64
           - os: macos-latest
             rid: osx-arm64
     defaults:
@@ -64,17 +62,13 @@ jobs:
           echo "VERSION=$version" >> "$GITHUB_ENV"
           echo "PACKAGE=BoxScanJoiner-$version-${{ matrix.rid }}" >> "$GITHUB_ENV"
 
-      # OpenCV's Linux and Intel macOS builds link against system libraries that the runners may lack
+      # OpenCV's Linux builds link against system libraries that the runners may lack
       - name: Install OpenCV dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-0t64 libtesseract5 libavcodec60 libavformat60 libavutil58 libswscale7 \
             libjpeg-turbo8 libpng16-16t64 libtiff6 libwebp7 libwebpmux3 libwebpdemux2
-
-      - name: Install OpenCV dependencies (macOS)
-        if: matrix.rid == 'osx-x64'
-        run: brew install libavif
 
       - name: Test
         run: dotnet test -c Release --output Detailed
