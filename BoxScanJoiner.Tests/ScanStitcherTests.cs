@@ -243,4 +243,51 @@ public class ScanStitcherTests
         Assert.False(result.Pairs[0].Accepted);
         Assert.NotNull(result.Pairs[0].Agreement);
     }
+
+    [Fact]
+    public void CropsAwayBlurredNeighbouringFace()
+    {
+        // A thin 2400 x 600 side of a box; beyond its long edge the next face rises off the glass, scanned out of
+        // focus and streaked along the edge
+        using Mat side = TestImages.CreateArtwork(2400, 600, 5);
+
+        using Mat face = TestImages.CreateArtwork(2400, 260, 6);
+        Cv2.GaussianBlur(face, face, new Size(0, 0), 10);
+
+        // Streaks: each row a little lighter or darker, constant along the edge
+        var rng   = new Random(3);
+        int rows  = face.Rows;
+        int width = face.Cols;
+
+        for(var y = 0; y < rows; y++)
+        {
+            using Mat row = face[new Rect(0, y, width, 1)];
+            Cv2.Add(row, Scalar.All(rng.Next(-12, 12)), row);
+        }
+
+        using var lid = new Mat(1300, 2800, MatType.CV_8UC3, Scalar.All(245));
+
+        using(Mat target = lid[new Rect(200, 250, 2400, 600)]) side.CopyTo(target);
+
+        using(Mat target = lid[new Rect(200, 850, 2400, 260)]) face.CopyTo(target);
+
+        var tileSize = new Size(1600, 1300);
+
+        Similarity[] placements = [TestImages.Placement(0, 0, 0, tileSize), TestImages.Placement(1200, 0, 0, tileSize)];
+
+        Mat[] tiles = placements.Select(p => TestImages.CutTile(lid, p, tileSize)).ToArray();
+
+        try
+        {
+            using StitchResult result = ScanStitcher.Stitch(tiles,
+                                                            cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.InRange(result.Image.Width,  2370, 2430);
+            Assert.InRange(result.Image.Height, 585,  625);
+        }
+        finally
+        {
+            foreach(Mat t in tiles) t.Dispose();
+        }
+    }
 }
