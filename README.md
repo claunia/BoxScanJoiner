@@ -168,16 +168,19 @@ dotnet run -c Release --project BoxScanJoiner.Gui
 dotnet run -c Release --project BoxScanJoiner -- scan1.png scan2.png -o box.png
 ```
 
-To get a folder of ready-to-run programs, publish them:
+To get ready-to-run programs, publish them:
 
 ```
 dotnet publish BoxScanJoiner     -c Release -r linux-x64 -o out/cli
 dotnet publish BoxScanJoiner.Gui -c Release -r linux-x64 -o out/gui
 ```
 
-Use `-r win-x64` for Windows. Published this way, the programs need the .NET 10
-runtime on the computer that runs them. Add `--self-contained` to include the
-runtime, so the folder can be copied to any computer of the same kind.
+Use `-r win-x64` for Windows. Each app is published as a single executable
+file, `BoxScanJoiner` or `BoxScanJoiner.Gui` (with `.exe` on Windows). The file
+contains the .NET runtime, OpenCV and everything else it needs, so it can be
+copied to any computer of the same kind and run there without installing
+anything. The `.pdb` files next to it are only for debugging and can be left
+out.
 
 ## License
 

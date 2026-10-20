@@ -2,6 +2,15 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
+        <PublishSingleFile>true</PublishSingleFile>
+        <!-- OpenCV (and Skia/HarfBuzz for the GUI) are native; bundle them into the single file too -->
+        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    </PropertyGroup>
+
+    <!-- Published apps carry the .NET runtime; regular builds and the tests that reference them stay framework-dependent -->
+    <PropertyGroup Condition="'$(_IsPublishing)' == 'true'">
+        <SelfContained>true</SelfContained>
+        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     </PropertyGroup>
 
     <ItemGroup>
