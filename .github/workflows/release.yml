@@ -48,10 +48,18 @@ jobs:
 
       - name: Work out version
         run: |
+          project_version="$(dotnet msbuild BoxScanJoiner -getProperty:Version)"
+
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
             version="${GITHUB_REF_NAME#v}"
+
+            # Pre-release tags (v1.0.0-beta1) only need to match the version they lead up to
+            if [[ "${version%%-*}" != "$project_version" ]]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match version $project_version in Directory.Build.props"
+              exit 1
+            fi
           else
-            version="0.0.0-ci.${GITHUB_RUN_NUMBER}"
+            version="$project_version-ci.${GITHUB_RUN_NUMBER}"
           fi
           echo "VERSION=$version" >> "$GITHUB_ENV"
           echo "PACKAGE=BoxScanJoiner-$version-${{ matrix.rid }}" >> "$GITHUB_ENV"
